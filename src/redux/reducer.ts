@@ -5,11 +5,16 @@ import {
   SET_DETAIL_ITEM
 } from './actionTypes'
 
-export const initialState = {
+interface InitialState {
+  isLoading: boolean
+  searchList: any[]
+  error?: Error
+  detailItem?: Record<string, any>
+}
+
+export const initialState: InitialState = {
   isLoading: false,
-  searchList: [],
-  error: null,
-  detailItem: null
+  searchList: []
 }
 
 export default function (state = initialState, action: any): any {

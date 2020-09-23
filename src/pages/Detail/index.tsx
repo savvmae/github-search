@@ -1,8 +1,37 @@
 import React, { ReactElement } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { RootState } from '../../store'
-import { Card, PageContainer } from '../../subcomponents'
+import { Card, PageContainer, PageHeader } from '../../subcomponents'
 import { Redirect } from 'react-router-dom'
+import styled from 'styled-components'
+
+const Title = styled.h5`
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 0;
+`
+
+const Row = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  margin: 12px 0;
+
+  @media (min-width: 480px) {
+    flex-direction: row;
+  }
+`
+
+const Label = styled.span`
+  font-weight: bold;
+`
+
+const Description = styled.p`
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 24px;
+`
 
 const Detail = (): ReactElement => {
   const { detailItem } = useSelector(
@@ -13,7 +42,7 @@ const Detail = (): ReactElement => {
   )
 
   if (!detailItem) {
-    return <Redirect to="/"></Redirect>
+    return <Redirect to="/" />
   } else {
     const {
       name,
@@ -21,16 +50,26 @@ const Detail = (): ReactElement => {
       stargazers_count,
       language,
       owner: { login }
-    } = detailItem as any
+    } = detailItem
 
     return (
       <PageContainer>
+        <PageHeader>Repository Details</PageHeader>
         <Card>
-          <p>{name}</p>
-          <p>{description}</p>
-          <p>{stargazers_count}</p>
-          <p>{language}</p>
-          <p>{login}</p>
+          <Title>{name}</Title>
+          <Description>{description}</Description>
+          <Row>
+            <Label>Number of Stars:</Label>
+            <span>{stargazers_count}</span>
+          </Row>
+          <Row>
+            <Label>Programming Language:</Label>
+            <span>{language ?? 'Unavailable'}</span>
+          </Row>
+          <Row>
+            <Label>Repository Owner:</Label>
+            <span>{login}</span>
+          </Row>
         </Card>
       </PageContainer>
     )
