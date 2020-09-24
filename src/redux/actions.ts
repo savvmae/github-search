@@ -24,6 +24,8 @@ export const fetchSearchResults = (searchTerm: string) => async (
   dispatch: Dispatch
 ) => {
   dispatch({ type: FETCH_SEARCH_RESULTS })
+
+  try {
   await fetch(`https://api.github.com/search/repositories?q=${searchTerm}`, {
     method: 'GET',
     headers: {
@@ -37,11 +39,15 @@ export const fetchSearchResults = (searchTerm: string) => async (
       return response.json()
     })
     .then((data) => {
-      return dispatch(fetchSearchResultsFulfilled(data.items))
+      const payload = {
+        items: data.items,
+        count: data.total_count
+      }
+      return dispatch(fetchSearchResultsFulfilled(payload))
     })
-    .catch((err) => {
-      return dispatch(fetchSearchResultsFailed(err.message))
-    })
+  } catch (e) {
+    return dispatch(fetchSearchResultsFailed(e))
+  }
 }
 
 export const setDetailItem = (item: any) => {

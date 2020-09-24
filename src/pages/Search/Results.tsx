@@ -1,11 +1,24 @@
 import React, { ReactElement, useState, useEffect, SyntheticEvent } from 'react'
-import styled from 'styled-components'
 import { useHistory } from 'react-router'
 import { useSelector, shallowEqual, useDispatch } from 'react-redux'
 import { RootState } from '../../store'
-import Loader from './Loader'
+
 import { setDetailItem } from '../../redux/actions'
-import getSortedByStars from './getSortedByStars'
+import {
+  getSortedByStars,
+  getAvailableLanguages,
+  getFilteredByLanguageList
+} from './helpers'
+import {
+  Item,
+  ContentContainer,
+  Name,
+  Description,
+  ListOptions,
+  Select,
+  SelectLabel,
+  SortWrapper
+} from './subcomponents'
 
 const SORT_BY = {
   bestMatch: 'BEST_MATCH',
@@ -14,42 +27,10 @@ const SORT_BY = {
 
 const NO_FILTER = 'no-filter'
 
-const Item = styled.div`
-  border-bottom: 1px solid gray;
-  padding-top: 12px;
-`
-
-const ContentContainer = styled.div`
-  margin-top: 30px;
-  width: 100%;
-  padding: 0 12px;
-`
-
-const Name = styled.button`
-  font-weight: 600;
-  font-size: 18px;
-  border: none;
-  background-color: inherit;
-  color: #34657f;
-  margin: 0;
-  padding: 0;
-`
-
-const Description = styled.p`
-  margin: 12px 0;
-`
-
-const ListOptions = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`
-
 const Results = (): ReactElement => {
-  const { searchList, isLoading } = useSelector(
+  const { searchList } = useSelector(
     (state: RootState) => ({
-      searchList: state.searchList,
-      isLoading: state.isLoading
+      searchList: state.searchList
     }),
     shallowEqual
   )
@@ -68,10 +49,7 @@ const Results = (): ReactElement => {
   }
 
   useEffect(() => {
-    const languages = Array.from(
-      new Set(searchList.map((item: any) => item.language).filter(Boolean))
-    )
-    setLanguages(languages)
+    setLanguages(getAvailableLanguages(searchList))
   }, [searchList])
 
   useEffect(() => {
@@ -80,24 +58,17 @@ const Results = (): ReactElement => {
       sortedList = getSortedByStars(searchList)
     }
     if (filteredLanguage !== NO_FILTER) {
-      sortedList = [...sortedList].filter(
-        (item) => item.language === filteredLanguage
-      )
+      sortedList = getFilteredByLanguageList(sortedList, filteredLanguage)
     }
     setSortedList([...sortedList])
   }, [filteredLanguage, searchList, sortBy])
 
-  if (isLoading) {
-    return <Loader />
-  }
-
-  if (sortedList.length) {
     return (
       <ContentContainer>
         <ListOptions>
-          <div>
-            <label htmlFor="list-sort">Sort By: </label>
-            <select
+          <SortWrapper>
+            <SelectLabel htmlFor="list-sort">Sort By: </SelectLabel>
+            <Select
               name="sort"
               id="list-sort"
               onChange={(e: SyntheticEvent<HTMLSelectElement>) =>
@@ -106,11 +77,11 @@ const Results = (): ReactElement => {
             >
               <option value={SORT_BY.bestMatch}>Best Match (Default)</option>
               <option value={SORT_BY.stars}>Number of Stars</option>
-            </select>
-          </div>
+            </Select>
+          </SortWrapper>
           <div>
-            <label htmlFor="language-filter">Language: </label>
-            <select
+            <SelectLabel htmlFor="language-filter">Language: </SelectLabel>
+            <Select
               name="filter"
               id="language-filter"
               onChange={(e: SyntheticEvent<HTMLSelectElement>) =>
@@ -118,19 +89,19 @@ const Results = (): ReactElement => {
               }
             >
               <option value={NO_FILTER}>No language selected</option>
-              {languages.map((language, index) => {
+              {languages.map((language) => {
                 return (
-                  <option key={`${index + 1}`} value={language}>
+                  <option key={language} value={language}>
                     {language}
                   </option>
                 )
               })}
-            </select>
+            </Select>
           </div>
         </ListOptions>
-        {sortedList.map((item: any, index: number) => {
+        {sortedList.map((item: any) => {
           return (
-            <Item key={`${index + 1}`}>
+            <Item key={item.id}>
               <Name onClick={() => handleSetDetail(item)}>
                 {item.full_name}
               </Name>
@@ -142,9 +113,6 @@ const Results = (): ReactElement => {
         })}
       </ContentContainer>
     )
-  }
-
-  return <></>
 }
 
 export default Results

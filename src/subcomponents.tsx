@@ -1,8 +1,7 @@
 import styled from 'styled-components'
 
 export const PageContainer = styled.div`
-  overflow: scroll;
-  max-width: 1200px;
+  max-width: 1080px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -23,5 +22,6 @@ export const Card = styled.div`
 
   @media (min-width: 480px) {
     min-width: 350px;
+    max-width: 720px;
   }
 `

@@ -10,6 +10,7 @@ interface InitialState {
   searchList: any[]
   error?: Error
   detailItem?: Record<string, any>
+  count?: number
 }
 
 export const initialState: InitialState = {
@@ -22,13 +23,16 @@ export default function (state = initialState, action: any): any {
     case FETCH_SEARCH_RESULTS: {
       return {
         ...state,
+        error: null,
+        count: null,
         isLoading: true
       }
     }
     case FETCH_SEARCH_RESULTS_FULFILLED: {
       return {
         isLoading: false,
-        searchList: action.payload
+        searchList: action.payload.items,
+        count: action.payload.count
       }
     }
     case FETCH_SEARCH_RESULTS_FAILED: {

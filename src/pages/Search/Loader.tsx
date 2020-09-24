@@ -13,7 +13,7 @@ const Animation = keyframes`
 
 const Wrapper = styled.div`
   margin-top: 50px;
-  
+
   svg {
     animation: ${Animation} 1s linear infinite;
   }
@@ -21,7 +21,7 @@ const Wrapper = styled.div`
 
 const Loader = (): ReactElement => {
   return (
-    <Wrapper>
+    <Wrapper data-testid="loader">
       <svg
         fill="#34657F"
         width="40"

@@ -1,57 +1,69 @@
-import React, { ReactElement, SyntheticEvent } from 'react'
-import styled from 'styled-components'
-import { useDispatch } from 'react-redux'
+import React, { ReactElement, SyntheticEvent, useEffect, useState } from 'react'
+import { useDispatch, useSelector, shallowEqual } from 'react-redux'
 import { PageContainer, PageHeader, Card } from '../../subcomponents'
 import { fetchSearchResults } from '../../redux/actions'
 import Results from './Results'
-
-const SearchInput = styled.input`
-  padding: 8px;
-	width: 200px;
-	margin: auto;
-	display: block;
-	border-radius: 5px;
-	border-style: solid;
-`
-
-const SubmitButton = styled.button`
-	min-width: 120px;
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: center;
-	font-weight: 700;
-	margin: 12px auto 0;
-	height: 32px;
-	text-transform: uppercase;
-	background-color: #34657F;
-	color: #FFFFFF;
-	border: none;
-	border-radius: 5px;
-`
+import { RootState } from '../../store'
+import Loader from './Loader'
+import { SearchInput, SubmitButton, Error, NoResults } from './subcomponents'
 
 const Search = (): ReactElement => {
-	const dispatch = useDispatch()
-  const [searchValue, setSearchValue] = React.useState('')
+  const { error, searchList, isLoading, count } = useSelector(
+    (state: RootState) => ({
+      error: state.error,
+      searchList: state.searchList,
+      isLoading: state.isLoading,
+      count: state.count
+    }),
+    shallowEqual
+  )
 
-	const handleSubmit = () => {
-		dispatch(fetchSearchResults(searchValue))
-	}
+  const dispatch = useDispatch()
+  const [shouldShowResults, setShouldShowResults] = useState(() => {
+    return searchList?.length > 0 && !isLoading && !error
+  })
+  const [searchValue, setSearchValue] = useState('')
+
+  const handleSubmit = (e?: SyntheticEvent) => {
+		e?.preventDefault()
+    dispatch(fetchSearchResults(searchValue))
+  }
+
+  useEffect(() => {
+    setShouldShowResults(searchList?.length > 0 && !isLoading && !error)
+  }, [searchList, isLoading, error])
 
   return (
     <PageContainer>
       <Card>
         <PageHeader>Search All GitHub Repositories</PageHeader>
-        <SearchInput
-          placeholder="Search"
-          value={searchValue}
-          onChange={(e: SyntheticEvent<HTMLInputElement>) =>
-            setSearchValue(e.currentTarget.value)
-          }
-        />
-				<SubmitButton onClick={handleSubmit}>submit</SubmitButton>
+        <form onSubmit={handleSubmit}>
+          <SearchInput
+            placeholder="Search"
+            value={searchValue}
+            onChange={(e: SyntheticEvent<HTMLInputElement>) =>
+              setSearchValue(e.currentTarget.value)
+            }
+          />
+          <SubmitButton onClick={handleSubmit}>submit</SubmitButton>
+        </form>
       </Card>
-			<Results />
+
+      {error && (
+        <Error>
+          <span>We're sorry, something went wrong. Please try again.</span>
+        </Error>
+      )}
+
+      {isLoading && <Loader />}
+
+      {count === 0 && (
+        <NoResults>
+          No repositories found. Please enter something different.
+        </NoResults>
+      )}
+
+      {shouldShowResults && <Results />}
     </PageContainer>
   )
 }
